@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Room from "./Room";
 import './App.css'
 
-const socket = io("http://172.20.10.3:4000");
+const socket = io(process.env.REACT_APP_SERVER_URL || "http://localhost:4000");
 
 const App = () => {
   const [name, setName] = useState("");
