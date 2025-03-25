@@ -1,25 +1,81 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import Room from "./Room";
+import './App.css'
 
-function App() {
+const socket = io("http://172.20.10.3:4000");
+
+const App = () => {
+  const [name, setName] = useState("");
+  const [isJoined, setIsJoined] = useState(false);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    socket.on("updateUsers", (userList) => {
+      setUsers(userList);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const joinChat = () => {
+    if (name.trim()) {
+      socket.emit("join", name);
+      setIsJoined(true);
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              !isJoined ? (
+                <div className="loginTime">
+                  <h2 style={{ fontSize: '35px' }}>Ismingizni kiriting:</h2>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Sizning ismingiz"
+                    style={{ borderRadius: '10px', width: '300px', height: '70px', fontSize: '30px', border: '2px solid black', paddingLeft: '15px', color: 'black' }}
+                  />
+                  <br />
+                  <button
+                    onClick={joinChat}
+                    style={{ width: '300px', height: '150px', marginTop: '25px', fontSize: '50px', color: 'black', fontWeight: '700', borderRadius: '10px', border: 'none', cursor: 'pointer' }}>
+                    Kirish
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="">Kimlar xozir saytda:</h2>
+                  <h1 style={{}}>
+                    {users.map((user, index) => (
+                      <p key={index}>{user} <strong style={{color: '#23ff28'}}>(Online)</strong></p>
+                    ))} 
+                  </h1>
+                  <Link to="/room">
+                    <button
+                      onClick={joinChat}
+                      style={{ width: '300px', height: '150px', marginTop: '25px', fontSize: '35px', color: 'black', fontWeight: '700', borderRadius: '10px', border: '3px solid yellow', cursor: 'pointer' }}>
+                      Kino uchun zal
+                    </button>
+                  </Link>
+                </div>
+              )
+            }
+          />
+          <Route path="/room" element={<Room name={name} socket={socket} />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
