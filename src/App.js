@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Room from "./Room";
 import './App.css'
 
-const socket = io(process.env.REACT_APP_SERVER_URL || "https://movie-backend-capm.onrender.com");
+const socket = io("https://movie-backend-capm.onrender.com");
 
 const App = () => {
   const [name, setName] = useState("");
